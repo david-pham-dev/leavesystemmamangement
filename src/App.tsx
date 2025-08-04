@@ -1,26 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
 
+import './App.css';
+import LoginPage from './components/Login';
+import { Suspense} from "react";
+import { useRoutes, Routes, Route, BrowserRouter as Router} from "react-router-dom";
+import  ManagerDashboard  from './pages/ManagerDashboard';
+import EmployeeDashboard  from './pages/EmployeeDashboard';
+import ErrorDashboard from './pages/Error';
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Suspense fallback={<p>Loading...</p>}>
+      <>
+      {/* <ScrollToTop />      */}
+      <Router>
+      <Routes>
+        {/* <Route path="/test" element={ <Test />} /> */}
+        <Route path="/manager" element={ <ManagerDashboard/>} />
+        <Route path="/employee" element={<EmployeeDashboard />} />
+        <Route path="/notfound" element={<ErrorDashboard />} />
+        <Route path="/" element={<LoginPage />} />
+      </Routes>
+      </Router>
+      </>
+    </Suspense>
   );
 }
-
 export default App;
