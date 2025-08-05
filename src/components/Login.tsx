@@ -6,7 +6,6 @@ import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from "react-router-dom";
 const LoginPage: React.FC = () => {
   const API_URL = process.env.REACT_APP_API_URL;
-  console.log("PROD API_URL:", API_URL);
   const navigate = useNavigate();
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
@@ -42,14 +41,11 @@ const LoginPage: React.FC = () => {
   }
     const token = await response.text();
     var role = '';
-    console.log("This is token: ",token)
     localStorage.setItem("accessToken", token);
     var decodedToken = decodeJwtToken(token)
-    console.log("This is decoded: ",decodedToken)
     if(decodedToken){
       const roleClaimKey = Object.keys(decodedToken).find(k=> k.endsWith("/role"));
       role = roleClaimKey ? (decodedToken as any)[roleClaimKey] : null; // as any here because ClaimKeys are dynamic
-      console.log('this is role: ',role)
     } 
     if(role === "Employee"){
       navigate("/employee")

@@ -20,7 +20,6 @@ const EmployeeDashboard =() =>{
     var userId:number | null = null;
     if(token) {
       var decodedToken = DecodeToken(token)
-      console.log("this is decodedToken in employee: " , decodedToken)
       if (decodedToken){
         const userIdClaimKey = Object.keys(decodedToken).find(k=>k.endsWith('sub'))
         userId = userIdClaimKey ? (decodedToken as any)[userIdClaimKey] : null; // "as any" here because ClaimKeys are dynamic
