@@ -1,6 +1,4 @@
-// src/components/RegisterModal.tsx
 import React, { useState } from 'react';
-
 import { RegisterCredentials } from '../types/auth';
 
 interface RegistrationModalProps {
@@ -18,16 +16,15 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
+  const API_URL = process.env.REACT_APP_API_URL;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
     setSuccess(null);
-
     try {
-        const res = await fetch('http://localhost:5131/api/register',{
+        const res = await fetch(`${API_URL}/api/register`,{
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials)
