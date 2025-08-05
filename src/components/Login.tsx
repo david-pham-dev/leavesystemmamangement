@@ -6,6 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from "react-router-dom";
 const LoginPage: React.FC = () => {
   const API_URL = process.env.REACT_APP_API_URL;
+  console.log("PROD API_URL:", API_URL);
   const navigate = useNavigate();
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
@@ -30,7 +31,6 @@ const LoginPage: React.FC = () => {
     }
   };
   const handleSubmit = async () => {
-    console.log('Form data to send to API:', formData);
     const response = await fetch(`${API_URL}/api/login`,{
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
