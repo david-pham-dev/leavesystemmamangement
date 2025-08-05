@@ -159,7 +159,7 @@ const LoginPage: React.FC = () => {
             <div className="mt-8 text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <a onClick={()=> setShowModal(true)} href="/" className="text-blue-600 hover:text-blue-500 font-medium">
+                <a onClick={()=> setShowModal(true)} className="text-blue-600 hover:text-blue-500 font-medium">
                  Register A New Account
                 </a>
               </p>
