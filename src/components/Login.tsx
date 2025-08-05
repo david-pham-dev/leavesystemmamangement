@@ -51,10 +51,10 @@ const LoginPage: React.FC = () => {
       role = roleClaimKey ? (decodedToken as any)[roleClaimKey] : null; // as any here because ClaimKeys are dynamic
       console.log('this is role: ',role)
     } 
-    if(role == "Employee"){
+    if(role === "Employee"){
       navigate("/employee")
     }
-    if(role == "Manager"){
+    if(role === "Manager"){
       navigate("/manager")
     }
   };
@@ -163,7 +163,7 @@ const LoginPage: React.FC = () => {
             <div className="mt-8 text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <a onClick={()=> setShowModal(true)} href="#" className="text-blue-600 hover:text-blue-500 font-medium">
+                <a onClick={()=> setShowModal(true)} href="/" className="text-blue-600 hover:text-blue-500 font-medium">
                  Register A New Account
                 </a>
               </p>

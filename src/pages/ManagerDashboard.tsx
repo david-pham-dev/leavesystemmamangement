@@ -1,6 +1,5 @@
-import { User } from "lucide-react";
-import { useState, useEffect, use } from "react";
-import { redirect,useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback} from "react";
+import { useNavigate } from "react-router-dom";
 
 type User = {
   id: number;
@@ -21,17 +20,60 @@ type LeaveRequest = {
 
 export default function ManagerDashboard() {
   const navigate = useNavigate();
+  const API_URL = process.env.REACT_APP_API_URL;
   const [view, setView] = useState<"users" | "pending" | "allLeaves">("users"); //users is the default view
   const [users, setUsers] = useState<User[]>([]);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
   const [pendingLeaveRequests, setPendingLeaveRequests] = useState<LeaveRequest[]>([]);
   const [loading, setLoading] = useState(false);
   var token = localStorage.getItem("accessToken");
+//   const SetPendingLeaveRequests = useMemo(()=>{
+//     const pendingRequest:LeaveRequest[] = leaveRequests.filter(lr=> lr.status === "Pending");
+//     setPendingLeaveRequests(pendingRequest);
+// },[leaveRequests])
+  const loadData = useCallback(async () => {
+    setLoading(true);   
+    try{
+      const[usersRes, leaveRes] = await Promise.all([
+        await fetch(`${API_URL}/api/get-all-employees`,{
+          method: "GET",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }}),
+        await fetch(`${API_URL}/api/view-leave-requests`,{
+          method: "GET",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }})   
+      ])
+      const employees : User[] = await usersRes.json();
+      const allLeaveRequests: LeaveRequest[] = await leaveRes.json(); //declare allLeaves as array of LeaveRequest     
+      setUsers(employees);
+      setLeaveRequests(allLeaveRequests)
+      // if(allLeaveRequests){
+      //   const pendingLeaveRequests : LeaveRequest[] =  allLeaveRequests.filter(lr=> lr.status === "Pending");
+      //   setPendingLeaveRequests(pendingLeaveRequests);
+      // }
+      if(allLeaveRequests){
+        setPendingLeaveRequests(allLeaveRequests.filter(lr=> lr.status === "Pending"));
+      }
+    }
+    catch(error){
+      console.error(error);
+    }
+    finally{
+      setLoading(false);
+    }
+  },[token, API_URL]);
+ 
+  //   setPendingLeaveRequests(pendingLeaveRequests);
   useEffect(() => {
     loadData();
-  }, []);
+  },[loadData]);
   const handleApprove = async (userId : number) =>{
-   const res = await fetch(`http://localhost:5131/api/handle-leave-request/${userId}/approve`,{
+   const res = await fetch(`${API_URL}/api/handle-leave-request/${userId}/approve`,{
       method: "POST",
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -43,7 +85,7 @@ export default function ManagerDashboard() {
       loadData();
   }
   const handleReject = async (userId : number) =>{
-    const res = await fetch(`http://localhost:5131/api/handle-leave-request/${userId}/reject`,{
+    const res = await fetch(`${API_URL}/api/handle-leave-request/${userId}/reject`,{
        method: "POST",
        headers: {
          'Authorization': `Bearer ${token}`,
@@ -54,41 +96,7 @@ export default function ManagerDashboard() {
        }
        loadData();
    }
-  const loadData = async () => {
-    setLoading(true);   
-    try{
-      const[usersRes, leaveRes] = await Promise.all([
-        await fetch("http://localhost:5131/api/get-all-employees",{
-          method: "GET",
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }}),
-        await fetch("http://localhost:5131/api/view-leave-requests",{
-          method: "GET",
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }})   
-      ])
-      const employees : User[] = await usersRes.json();
-      const allLeaveRequests: LeaveRequest[] = await leaveRes.json(); //declear allLeaves as array of LeaveRequest     
-      setUsers(employees);
-      setLeaveRequests(allLeaveRequests)
-      if(allLeaveRequests){
-        const pendingLeaveRequests : LeaveRequest[] =  allLeaveRequests.filter(lr=> lr.status == "Pending");
-        setPendingLeaveRequests(pendingLeaveRequests);
-      }
-      
-      console.log("this is pending: ", pendingLeaveRequests)
-    }
-    catch(error){
-      console.error(error);
-    }
-    finally{
-      setLoading(false);
-    }
-  };
+ 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="flex justify-between items-center mb-6">

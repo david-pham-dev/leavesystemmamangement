@@ -1,4 +1,3 @@
-import { RegisterCredentials } from '../types/auth';
 const ErrorDashboard =() =>{
     return(
         <h1>404 NOT FOUND</h1>

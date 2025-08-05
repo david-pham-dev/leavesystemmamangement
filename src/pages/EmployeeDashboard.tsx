@@ -1,10 +1,6 @@
-import { RegisterCredentials } from '../types/auth';
-import { User } from "lucide-react";
 import DecodeToken from '../services/decodeToken';
-import { useState, useEffect, use } from "react";
-import { redirect, useNavigate } from "react-router-dom";
-import { stringify } from 'querystring';
-import { idText } from 'typescript';
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 type Employee = {
   name: string
   leaveQuota: number;
@@ -19,20 +15,17 @@ type EmployeeLeaveRequests = {
   createdAt :string;
 };
 const EmployeeDashboard =() =>{
+    const API_URL = process.env.REACT_APP_API_URL;
     var token = localStorage.getItem("accessToken");
-    var userId:number | null;
+    var userId:number | null = null;
     if(token) {
       var decodedToken = DecodeToken(token)
       console.log("this is decodedToken in employee: " , decodedToken)
       if (decodedToken){
         const userIdClaimKey = Object.keys(decodedToken).find(k=>k.endsWith('sub'))
         userId = userIdClaimKey ? (decodedToken as any)[userIdClaimKey] : null; // "as any" here because ClaimKeys are dynamic
-        console.log('this is userId: ',userId)
       }  
     }
-    useEffect(() => {
-      loadData();
-    }, []);
     const [employeeData, setEmployeeData] = useState<Employee>();    
     const [loading, setLoading] = useState(false);
     const [employeeLeaveRequests, setEmployeeLeaveRequests] = useState<EmployeeLeaveRequests[]>([]);
@@ -48,8 +41,7 @@ const EmployeeDashboard =() =>{
       setLoading(true);
       setError(null);
       setSuccess(null)
-      console.log('Start Date Submitted By Employee:', fromDate);
-      const res = await fetch(`http://localhost:5131/api/submit-leave-request/${userId}`,{
+      const res = await fetch(`${API_URL}/api/submit-leave-request/${userId}`,{
         method: "POST",
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
@@ -67,38 +59,41 @@ const EmployeeDashboard =() =>{
         setError(data.message || "Something went wrong");
       }
       loadData();
-
-
     }
-    const loadData = async () => {
-      setLoading(true);   
-      try{
-        const[employeeRes, employeeLeaveRequestsRes] = await Promise.all([
-          await fetch(`http://localhost:5131/api/get-my-details/${userId}`,{
-            method: "GET",
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }}),
-          await fetch(`http://localhost:5131/api/employee-view-leave-requests/${userId}`,{
-            method: "GET",
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }})   
-        ])
-        const employees : Employee = await employeeRes.json();
-        const allLeaveRequests: EmployeeLeaveRequests[] = await employeeLeaveRequestsRes.json(); //declear allLeaves as array of LeaveRequest     
-        setEmployeeData(employees);
-        setEmployeeLeaveRequests(allLeaveRequests) 
-      }
-      catch(error){
-        console.error(error);
-      }
-      finally{
-        setLoading(false);
-      }
-    };
+    const loadData = useCallback(
+      async () => {
+        setLoading(true);
+        const id = userId; 
+        try{
+          const[employeeRes, employeeLeaveRequestsRes] = await Promise.all([
+            await fetch(`${API_URL}/api/get-my-details/${id}`,{
+              method: "GET",
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }}),
+            await fetch(`${API_URL}/api/employee-view-leave-requests/${id}`,{
+              method: "GET",
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }})   
+          ])
+          const employees : Employee = await employeeRes.json();
+          const allLeaveRequests: EmployeeLeaveRequests[] = await employeeLeaveRequestsRes.json(); //declear allLeaves as array of LeaveRequest     
+          setEmployeeData(employees);
+          setEmployeeLeaveRequests(allLeaveRequests) 
+        }
+        catch(error){
+          console.error(error);
+        }
+        finally{
+          setLoading(false);
+        }
+      },[API_URL, token,userId]);
+      useEffect(() => {
+        loadData();
+      },[loadData]);  
     const handleCloseModal = ()=>{
       setFromDate('');
       setNote('');

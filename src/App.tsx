@@ -2,7 +2,7 @@
 import './App.css';
 import LoginPage from './components/Login';
 import { Suspense} from "react";
-import { useRoutes, Routes, Route, BrowserRouter as Router} from "react-router-dom";
+import { Routes, Route, BrowserRouter as Router} from "react-router-dom";
 import  ManagerDashboard  from './pages/ManagerDashboard';
 import EmployeeDashboard  from './pages/EmployeeDashboard';
 import ErrorDashboard from './pages/Error';
